@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Game Application</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #fff;
+      text-align: center;
+      padding: 30px;
+    }
+    .quiz-container {
+      max-width: 600px;
+      margin: auto;
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.2);
+    }
+    h2 { margin-bottom: 20px; }
+    .options {
+      text-align: left;
+      margin: 15px 0;
+    }
+    .options label {
+      display: block;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      background: #ff4c4c;
+      color: white;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #ff3333;
+    }
+    .result {
+      font-size: 20px;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="quiz-container">
+    <h2 id="question">Question will appear here</h2>
+    <div class="options" id="options"></div>
+    <input type="text" id="fillBlank" placeholder="Type your answer here" style="display:none; padding:8px; width:95%; margin-top:10px;">
+    <button onclick="nextQuestion()">Next</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        type: "single",
+        question: "What is the capital of France?",
+        options: ["Berlin", "Paris", "Rome", "Madrid"],
+        answer: "Paris"
+      },
+      {
+        type: "multi",
+        question: "Which of the following are programming languages?",
+        options: ["Python", "Snake", "Java", "Banana"],
+        answer: ["Python", "Java"]
+      },
+      {
+        type: "fill",
+        question: "Fill in the blank: The sun rises in the ____.",
+        answer: "east"
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    function loadQuestion() {
+      document.getElementById("result").innerText = "";
+      const q = quizData[currentQuestion];
+      document.getElementById("question").innerText = q.question;
+
+      let optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+      document.getElementById("fillBlank").style.display = "none";
+
+      if (q.type === "single") {
+        q.options.forEach(opt => {
+          optionsDiv.innerHTML += `<label><input type="radio" name="option" value="${opt}"> ${opt}</label>`;
+        });
+      } else if (q.type === "multi") {
+        q.options.forEach(opt => {
+          optionsDiv.innerHTML += `<label><input type="checkbox" value="${opt}"> ${opt}</label>`;
+        });
+      } else if (q.type === "fill") {
+        document.getElementById("fillBlank").style.display = "block";
+      }
+    }
+
+    function nextQuestion() {
+      const q = quizData[currentQuestion];
+      let userAnswer;
+
+      if (q.type === "single") {
+        const selected = document.querySelector('input[name="option"]:checked');
+        if (selected) userAnswer = selected.value;
+      } else if (q.type === "multi") {
+        userAnswer = [];
+        document.querySelectorAll('input[type="checkbox"]:checked').forEach(chk => userAnswer.push(chk.value));
+      } else if (q.type === "fill") {
+        userAnswer = document.getElementById("fillBlank").value.trim().toLowerCase();
+      }
+
+      if (JSON.stringify(userAnswer) === JSON.stringify(q.answer) ||
+          (typeof q.answer === "string" && userAnswer?.toLowerCase() === q.answer.toLowerCase())) {
+        score++;
+      }
+
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        loadQuestion();
+      } else {
+        document.querySelector(".quiz-container").innerHTML = `<h2>Game Over!</h2><p>Your Score: ${score}/${quizData.length}</p>`;
+      }
+    }
+
+    loadQuestion();
+  </script>
+
+</body>
+</html>
